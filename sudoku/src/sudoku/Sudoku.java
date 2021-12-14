@@ -57,7 +57,7 @@ public class Sudoku implements SudokuSolver {
 	/**
 	 * Checks that all filled in digits follows the the sudoku rules.
 	 * 
-	 * @return true if all digits follow sudoku rules, false if it doesn't
+	 * @return true if all digits follow sudoku rules, false if they don't
 	 */
 	@Override
 	public boolean isValid() {
@@ -127,29 +127,29 @@ public class Sudoku implements SudokuSolver {
 	 *  Solves the sudoku
 	 */
 	private boolean solve(int row, int col) {
-		int newRow = row;
-		int newCol;
+		int prevRow = row;
+		int prevCol = col;
 
-		if (col == 8) {
-			newCol = 0;
-			newRow = row + 1;
+		if (prevCol == 8) {
+			col = 0;
+			row += 1;
 		} else {
-			newCol = col + 1;
+			col += 1;
 		}
 
-		if (row == 9) {
+		if (prevRow == 9) {
 			return true;
 		}
 
-		if (matrix[row][col] == 0) {
-			for (int i = 1; i < 10; i++) {
-				if (checkRules(row, col, i)) {
-					matrix[row][col] = i;
+		if (matrix[prevRow][prevCol] == 0) {
+			for (int digit = 1; digit < 10; digit++) {
+				if (checkRules(prevRow, prevCol, digit)) {
+					matrix[prevRow][prevCol] = digit;
 
-					if (solve(newRow, newCol)) {
+					if (solve(row, col)) {
 						return true;
 					} else {
-						matrix[row][col] = 0;
+						matrix[prevRow][prevCol] = 0;
 					}
 				}
 			}
@@ -157,7 +157,7 @@ public class Sudoku implements SudokuSolver {
 			return false;
 		}
 
-		return solve(newRow, newCol);
+		return solve(row, col);
 	}
 
 	/*
