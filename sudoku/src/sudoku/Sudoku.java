@@ -3,7 +3,6 @@ package sudoku;
 public class Sudoku implements SudokuSolver {
 
 	private int[][] matrix = new int[9][9];
-	private int[][] original = new int[9][9];
 
 	/**
 	 * Tries to solve the sudoku by using recursive backtracking.
@@ -30,7 +29,6 @@ public class Sudoku implements SudokuSolver {
 		}
 
 		matrix[row][col] = digit;
-		original[row][col] = digit;
 	}
 
 	/**
@@ -42,7 +40,6 @@ public class Sudoku implements SudokuSolver {
 	@Override
 	public void remove(int row, int col) {
 		matrix[row][col] = 0;
-		original[row][col] = 0;
 	}
 
 	/**
@@ -83,7 +80,6 @@ public class Sudoku implements SudokuSolver {
 	@Override
 	public void clear() {
 		matrix = new int[9][9];
-		original = new int[9][9];
 	}
 
 	/**
@@ -94,20 +90,19 @@ public class Sudoku implements SudokuSolver {
 	 */
 	@Override
 	public void setMatrix(int[][] m) {
-		for (int i = 0; i < 9; i++) {
-			if (m.length != matrix.length || m[i].length != matrix[i].length) {
+		for (int row = 0; row < 9; row++) {
+			if (m.length != matrix.length || m[row].length != matrix[row].length) {
 				throw new IllegalArgumentException("Wrong dimension for input matrix");
 			}
 
-			for (int j = 0; j < 9; j++) {
-				if (invalidDigit(m[i][j])) {
-					throw new IllegalArgumentException("Digit out of range");
+			for (int col = 0; col < 9; col++) {
+				if (invalidDigit(m[row][col])) {
+					throw new IllegalArgumentException("Digit at row: " + row + ", col: " + col + "is out of range");
 				}
 			}
 		}
 
 		matrix = m;
-		original = m;
 	}
 
 	/**
@@ -128,7 +123,9 @@ public class Sudoku implements SudokuSolver {
 		return temp;
 	}
 
-	// Solves the sudoku
+	/*
+	 *  Solves the sudoku
+	 */
 	private boolean solve(int row, int col) {
 		int newRow = row;
 		int newCol;
@@ -144,7 +141,7 @@ public class Sudoku implements SudokuSolver {
 			return true;
 		}
 
-		if (original[row][col] == 0) {
+		if (matrix[row][col] == 0) {
 			for (int i = 1; i < 10; i++) {
 				if (checkRules(row, col, i)) {
 					matrix[row][col] = i;
@@ -163,12 +160,16 @@ public class Sudoku implements SudokuSolver {
 		return solve(newRow, newCol);
 	}
 
-	// Checks that all the rules of sudoku is being followed
+	/*
+	 *  Checks that all the rules of sudoku is being followed
+	 */
 	private boolean checkRules(int row, int col, int digit) {
 		return checkRow(row, col, digit) && checkColumn(row, col, digit) && checkBox(row, col, digit);
 	}
 
-	// Check that the digit is allowed in its row
+	/*
+	 *  Check that the digit is allowed in its row
+	 */
 	private boolean checkRow(int row, int col, int digit) {
 		for (int i = 0; i < 9; i++) {
 			if (col != i && matrix[row][i] == digit) {
@@ -179,7 +180,9 @@ public class Sudoku implements SudokuSolver {
 		return true;
 	}
 
-	// Checks that the digit is allowed in its column
+	/*
+	 *  Checks that the digit is allowed in its column
+	 */
 	private boolean checkColumn(int row, int col, int digit) {
 		for (int i = 0; i < 9; i++) {
 			if (row != i && matrix[i][col] == digit) {
@@ -190,7 +193,9 @@ public class Sudoku implements SudokuSolver {
 		return true;
 	}
 
-	// Checks that the digit is allowed in its box
+	/*
+	 *  Checks that the digit is allowed in its box
+	 */
 	private boolean checkBox(int row, int col, int digit) {
 		int bx = row / 3;
 		int by = col / 3;
@@ -206,12 +211,16 @@ public class Sudoku implements SudokuSolver {
 		return true;
 	}
 
-	// Checks if the row, col and digit is in range
+	/*
+	 *  Checks if the row, col and digit is in range
+	 */
 	private boolean notInRange(int row, int col, int digit) {
 		return row < 0 || row > 8 || col < 0 || col > 8 || invalidDigit(digit);
 	}
 
-	// Checks if the digit is in range
+	/*
+	 *  Checks if the digit is in range
+	 */
 	private boolean invalidDigit(int digit) {
 		return digit < 0 || digit > 9;
 	}

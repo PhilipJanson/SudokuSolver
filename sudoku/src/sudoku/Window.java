@@ -21,6 +21,7 @@ public class Window {
 
 	public static final Color GRAY = new Color(0xEAEAEA);
 	public static final Color ORANGE = new Color(0xFFD2B5);
+	public static final Color RED = new Color(0xFF7777);
 
 	private SudokuSolver sudoku;
 	private Font font;
@@ -31,7 +32,9 @@ public class Window {
 		SwingUtilities.invokeLater(() -> createWindow("Sudoku Solver", 800, 800));
 	}
 
-	// Creates the window and initializes its components
+	/*
+	 * Creates the window and initializes its components
+	 */
 	private void createWindow(String title, int width, int height) {
 		JFrame frame = new JFrame(title);
 		Container pane = frame.getContentPane();
@@ -44,35 +47,47 @@ public class Window {
 
 		JButton solve = new JButton("Solve");
 		JButton clear = new JButton("Clear");
+		JTextField field = new JTextField("Enter number");
+		JButton show = new JButton("Show");
+		JButton hide = new JButton("Hide");
+
 		solve.addActionListener(e -> solve(board));
 		clear.addActionListener(e -> clear(board));
+		show.addActionListener(e -> show(board, field));
+		hide.addActionListener(e -> hide(board));
+		field.addKeyListener(new KeyHandler());
 
 		panel.add(solve);
 		panel.add(clear);
+		panel.add(field);
+		panel.add(show);
+		panel.add(hide);
 
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		frame.setSize(width, height);
-		//frame.setResizable(false);
+		// frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 	}
 
-	// Creates the board and fills it the UI with values from the SudokuSolver's matrix
+	/*
+	 * Creates the board and fills it the UI with values from the SudokuSolver's matrix
+	 */
 	private JPanel initBoard() {
 		JPanel board = new JPanel();
 		board.setLayout(new GridLayout(9, 1));
 
-		for (int i = 0; i < 9; i++) {
+		for (int row = 0; row < 9; row++) {
 			JPanel group = new JPanel();
 			group.setLayout(new GridLayout(1, 9));
 
-			for (int j = 0; j < 9; j++) {
-				JTextField box = new JTextField(sudoku.get(i, j) == 0 ? "" : String.valueOf(sudoku.get(i, j)));
+			for (int col = 0; col < 9; col++) {
+				JTextField box = new JTextField(sudoku.get(row, col) == 0 ? "" : String.valueOf(sudoku.get(row, col)));
 				box.addKeyListener(new KeyHandler());
 				box.setFont(font);
 				box.setHorizontalAlignment(SwingConstants.CENTER);
-				box.setBackground((i / 3 + j / 3) % 2 == 0 ? ORANGE : GRAY);
+				box.setBackground((row / 3 + col / 3) % 2 == 0 ? ORANGE : GRAY);
 
 				group.add(box);
 			}
@@ -83,7 +98,9 @@ public class Window {
 		return board;
 	}
 
-	// Clears the both the UI and the SudokuSolver's matrix
+	/*
+	 * Clears the both the UI and the SudokuSolver's matrix
+	 */
 	private void clear(JPanel board) {
 		for (Component group : board.getComponents()) {
 			for (Component textField : ((JPanel) group).getComponents()) {
@@ -94,27 +111,26 @@ public class Window {
 		sudoku.clear();
 	}
 
-	// Solves the sudoku and then fills the UI with the values from the SudokuSolver's matrix
+	/*
+	 * Solves the sudoku and then fills the UI with the values from the SudokuSolver's matrix
+	 */
 	private void solve(JPanel board) {
 		fillMatrix(board);
-		
-		int i = 0;
-		int j = 0;
 
 		if (sudoku.isValid()) {
 			if (sudoku.solve()) {
-				i = 0;
-				j = 0;
+				int row = 0;
+				int col = 0;
 
 				for (Component group : board.getComponents()) {
 					for (Component textField : ((JPanel) group).getComponents()) {
 						JTextField box = (JTextField) textField;
-						box.setText(String.valueOf(sudoku.get(i, j)));
-						j++;
+						box.setText(String.valueOf(sudoku.get(row, col)));
+						col++;
 					}
 
-					j = 0;
-					i++;
+					col = 0;
+					row++;
 				}
 
 				JOptionPane.showMessageDialog(board, "Success!", "Done", JOptionPane.INFORMATION_MESSAGE);
@@ -126,23 +142,63 @@ public class Window {
 		}
 	}
 
-	// Fills the matrix in SudokuSolver with the values in the boxes from the UI
+	/*
+	 * Fills the matrix in SudokuSolver with the values in the boxes from the UI
+	 */
 	private void fillMatrix(JPanel board) {
-		int i = 0;
-		int j = 0;
-		
+		int row = 0;
+		int col = 0;
+
 		for (Component group : board.getComponents()) {
 			for (Component textField : ((JPanel) group).getComponents()) {
 				JTextField box = (JTextField) textField;
-				sudoku.add(i, j, box.getText().isEmpty() ? 0 : Integer.valueOf(box.getText()));
-				j++;
+				sudoku.add(row, col, box.getText().isEmpty() ? 0 : Integer.valueOf(box.getText()));
+				col++;
 			}
 
-			j = 0;
-			i++;
+			col = 0;
+			row++;
 		}
 	}
-	
+
+	/*
+	 * Used for debugging, highlights all the numbers specified in the textfield
+	 */
+	private void show(JPanel board, JTextField field) {
+		hide(board);
+
+		if (!field.getText().isEmpty()) {
+			for (Component group : board.getComponents()) {
+				for (Component textField : ((JPanel) group).getComponents()) {
+					if (((JTextField) textField).getText().equals(field.getText())) {
+						((JTextField) textField).setBackground(RED);
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	 * Used for debugging, hides all the the highlights
+	 */
+	private void hide(JPanel board) {
+		int row = 0;
+		int col = 0;
+
+		for (Component group : board.getComponents()) {
+			for (Component textField : ((JPanel) group).getComponents()) {
+				((JTextField) textField).setBackground((row / 3 + col / 3) % 2 == 0 ? ORANGE : GRAY);
+				col++;
+			}
+
+			col = 0;
+			row++;
+		}
+	}
+
+	/*
+	 * A KeyListener used for checking the input of every box in the grid
+	 */
 	private static class KeyHandler implements KeyListener {
 
 		@Override
